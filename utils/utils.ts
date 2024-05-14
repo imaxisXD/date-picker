@@ -1,7 +1,6 @@
 export function getWeekendDates(start: Date, end: Date) {
   const tempWeekendDates: Date[] = [];
   const currentDate = new Date(start);
-
   while (currentDate <= end) {
     if (isWeekend(currentDate)) {
       tempWeekendDates.push(new Date(currentDate));
@@ -13,5 +12,9 @@ export function getWeekendDates(start: Date, end: Date) {
 }
 
 export function isWeekend(date: Date) {
-  date.getDay() === 0 || date.getDay() === 6;
+  return date.getDay() === 0 || date.getDay() === 6;
+}
+
+export function getDaysInMonth(month: number, year: number) {
+  return new Date(year, month + 1, 0).getDate();
 }
