@@ -29,9 +29,7 @@ export default function Home() {
         />
         <CalendarDays strokeWidth={1.5} height={18} width={18} />
       </button>
-      {showDatePicker && (
-        <DatePicker closeDatePicker={handleClick} predefinedRanges={} />
-      )}
+      {showDatePicker && <DatePicker closeDatePicker={handleClick} />}
     </main>
   );
 }
