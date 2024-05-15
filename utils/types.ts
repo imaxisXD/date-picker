@@ -8,5 +8,9 @@ export interface WeekendDates {
 }
 
 export interface DateRangePickerProps {
-  predefinedRanges?: { label: string; range: DateRange }[];
+  predefinedRanges?: {
+    label: string;
+    range: DateRange;
+  }[];
+  closeDatePicker: () => void;
 }

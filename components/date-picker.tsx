@@ -6,8 +6,13 @@ import { toast } from "sonner";
 import useDropdown from "@/utils/hooks/useDropDown";
 import { WeekHeader } from "./week-header";
 import Calendar from "./calendar";
+import { useRouter } from "next/navigation";
 
-const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
+const DatePicker: React.FC<DateRangePickerProps> = ({
+  predefinedRanges,
+  closeDatePicker,
+}) => {
+  const router = useRouter();
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: null,
     endDate: null,
@@ -339,6 +344,20 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
             {dateRange.endDate?.toLocaleDateString()}
           </span>
         </div>
+        {dateRange.startDate && dateRange.endDate && (
+          <button
+            className="px-4 mt-4 py-1 rounded bg-sky-500 hover:bg-sky-600 transition-all duration-300 ease-in-out"
+            onClick={() => {
+              closeDatePicker();
+              router.push(
+                `?startdate=${dateRange.startDate?.toLocaleDateString()}&enddate=${dateRange.endDate?.toLocaleDateString()}`
+              );
+            }}
+          >
+            Save
+          </button>
+        )}
+
         {predefinedRanges && (
           <div className="mt-4">
             <h3 className="text-lg font-bold mb-2">Predefined Ranges:</h3>
