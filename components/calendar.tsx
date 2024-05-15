@@ -1,4 +1,4 @@
-"use client";
+import React from "react";
 import { getDaysInMonth, isWeekend } from "@/utils/utils";
 import { DateRange, WeekendDates } from "@/utils/types";
 
@@ -8,6 +8,7 @@ interface CalendarProps {
   dateRange: DateRange;
   weekendDates: WeekendDates;
   onDateClick: (date: Date) => void;
+  highlightToday?: boolean;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -16,7 +17,18 @@ const Calendar: React.FC<CalendarProps> = ({
   dateRange,
   weekendDates,
   onDateClick,
+  highlightToday = false,
 }) => {
+  const today = new Date();
+  const isToday = (date: Date) => {
+    return (
+      highlightToday &&
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
   const isDateInRange = (date: Date) => {
     const { startDate, endDate } = dateRange;
     return startDate && endDate && date >= startDate && date <= endDate;
@@ -48,12 +60,13 @@ const Calendar: React.FC<CalendarProps> = ({
         } else {
           const currentDate = new Date(year, month, date);
           const isWeekendDay = isWeekend(currentDate);
-
           const isSelectedDay = isDateInRange(currentDate) && !isWeekendDay;
           const isStartOrEndDate =
             (currentDate.getTime() === dateRange.startDate?.getTime() ||
               currentDate.getTime() === dateRange.endDate?.getTime()) &&
             !isWeekendDay;
+
+          const isTodayClass = isToday(currentDate) ? " bg-red-500" : "";
 
           calendarCells.push(
             <button
@@ -64,7 +77,7 @@ const Calendar: React.FC<CalendarProps> = ({
                 isStartOrEndDate
                   ? "bg-blue-500 rounded-sm text-white outline outline-sky-500"
                   : ""
-              }`}
+              }${isTodayClass}`}
               onClick={() => onDateClick(currentDate)}
             >
               {date}
