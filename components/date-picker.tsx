@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { DateRange, DateRangePickerProps, WeekendDates } from "@/utils/types";
 import { getDaysInMonth, getWeekendDates, isWeekend } from "@/utils/utils";
+import { toast } from "sonner";
 
 const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -36,6 +37,8 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
         setDateRange({ startDate: date, endDate: null });
         setWeekendDates({ weekendDates: [] });
       }
+    } else {
+      toast.warning("Select a date that is not a weekend");
     }
   };
 
@@ -187,30 +190,42 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
         </div>
       </div>
 
-      <div className="mt-4">
-        <h3 className="text-lg font-bold mb-2">Weekend Dates:</h3>
-        <ul className="overflow-auto h-32">
-          {weekendDates.weekendDates.map((date) => (
-            <li key={date.toISOString()}>{date.toLocaleDateString()}</li>
-          ))}
-        </ul>
-      </div>
-      {predefinedRanges && (
-        <div className="mt-4">
-          <h3 className="text-lg font-bold mb-2">Predefined Ranges:</h3>
-          <div className="flex flex-wrap">
-            {predefinedRanges.map((range) => (
-              <button
-                key={range.label}
-                className="px-2 py-1 mr-2 mb-2 rounded bg-gray-700 hover:bg-gray-600"
-                onClick={() => handlePredefinedRangeClick(range.range)}
-              >
-                {range.label}
-              </button>
+      <div className="flex justify-between items-start border-t border-white/35 mt-4">
+        <div className="mt-4 w-fit">
+          <h3 className="text-base mb-2">Weekend Dates:</h3>
+          <ul className="overflow-auto h-32">
+            {weekendDates.weekendDates.map((date) => (
+              <li key={date.toISOString()}>{date.toLocaleDateString()}</li>
             ))}
-          </div>
+          </ul>
         </div>
-      )}
+        <div className="mt-4 w-fit flex items-center justify-center gap-3">
+          <h3 className="text-base">Start Dates:</h3>
+          <span className="text-gray-400">
+            {dateRange.startDate?.toLocaleDateString()}
+          </span>
+          <h3 className="text-base">End Dates:</h3>
+          <span className="text-gray-400">
+            {dateRange.endDate?.toLocaleDateString()}
+          </span>
+        </div>
+        {predefinedRanges && (
+          <div className="mt-4">
+            <h3 className="text-lg font-bold mb-2">Predefined Ranges:</h3>
+            <div className="flex flex-wrap">
+              {predefinedRanges.map((range) => (
+                <button
+                  key={range.label}
+                  className="px-2 py-1 mr-2 mb-2 rounded bg-gray-700 hover:bg-gray-600"
+                  onClick={() => handlePredefinedRangeClick(range.range)}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
