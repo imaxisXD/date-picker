@@ -181,7 +181,7 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
             </button>
             <div className="flex items-center justify-between gap-5 relative">
               <button
-                className="cursor-pointer border border-white/25 px-2 py-0.5 rounded-md bg-slate-500/80 hover:bg-gray-600 transition-all duration-300 ease-in-out"
+                className="cursor-pointer border border-white/25 px-0 py-0.5 rounded-md bg-slate-500/80 hover:bg-gray-600 transition-all duration-300 ease-in-out"
                 onClick={() => setShowNextMonthDropdown(!showNextMonthDropdown)}
               >
                 <span className="mx-2">{months[nextMonth]}</span>
