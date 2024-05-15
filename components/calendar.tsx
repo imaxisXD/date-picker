@@ -37,15 +37,20 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   const isDateInRangeExcludingWeekends = (date: Date) => {
-    if (!dateRange.startDate || !hoverDate) {
+    const { startDate, endDate } = dateRange;
+
+    if (!startDate || !hoverDate || isWeekend(date)) {
       return false;
     }
 
-    if (isWeekend(date)) {
-      return false;
+    if (!endDate) {
+      return date >= startDate && date <= hoverDate;
     }
 
-    return date >= dateRange.startDate && date <= hoverDate;
+    return (
+      (date >= startDate && date <= hoverDate) ||
+      (date >= hoverDate && date <= endDate)
+    );
   };
 
   const handleHoverDate = (date: Date | null) => {
@@ -84,7 +89,9 @@ const Calendar: React.FC<CalendarProps> = ({
             (currentDate.getTime() === dateRange.startDate?.getTime() ||
               currentDate.getTime() === dateRange.endDate?.getTime()) &&
             !isWeekendDay;
-          const isTodayClass = isToday(currentDate) ? " bg-red-500" : "";
+          const isTodayClass = isToday(currentDate)
+            ? " bg-green-500/20 border rounded-md border-green-500"
+            : "";
           const isHighlightedDate = isDateInRangeExcludingWeekends(currentDate);
 
           calendarCells.push(

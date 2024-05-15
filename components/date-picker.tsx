@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DateRange, DateRangePickerProps, WeekendDates } from "@/utils/types";
 import { getWeekendDates, isWeekend, months, years } from "@/utils/utils";
 import { toast } from "sonner";
@@ -7,12 +7,14 @@ import useDropdown from "@/utils/hooks/useDropDown";
 import { WeekHeader } from "./week-header";
 import Calendar from "./calendar";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const DatePicker: React.FC<DateRangePickerProps> = ({
   predefinedRanges,
   closeDatePicker,
 }) => {
   const router = useRouter();
+
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: null,
     endDate: null,
@@ -20,18 +22,35 @@ const DatePicker: React.FC<DateRangePickerProps> = ({
   const [weekendDates, setWeekendDates] = useState<WeekendDates>({
     weekendDates: [],
   });
-
+  const [storedDateRange, setStoredDateRange] = useState<DateRange | null>(
+    null
+  );
   // Initialize months and years based on today's date
   const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-
+  const [currentMonth, setCurrentMonth] = useState(
+    storedDateRange?.startDate
+      ? new Date(storedDateRange.startDate).getMonth()
+      : today.getMonth()
+  );
+  const [currentYear, setCurrentYear] = useState(
+    storedDateRange?.startDate
+      ? new Date(storedDateRange.startDate).getFullYear()
+      : today.getFullYear()
+  );
   // Initialize Calendar 2 to the next month
   const [nextMonth, setNextMonth] = useState(
-    today.getMonth() === 11 ? 0 : today.getMonth() + 1
+    storedDateRange?.endDate
+      ? new Date(storedDateRange.endDate).getMonth()
+      : today.getMonth() === 11
+      ? 0
+      : today.getMonth() + 1
   );
   const [nextMonthYear, setNextMonthYear] = useState(
-    today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear()
+    storedDateRange?.endDate
+      ? new Date(storedDateRange.endDate).getFullYear()
+      : today.getMonth() === 11
+      ? today.getFullYear() + 1
+      : today.getFullYear()
   );
 
   const {
@@ -75,6 +94,7 @@ const DatePicker: React.FC<DateRangePickerProps> = ({
       toast.warning("Select a date that is not a weekend");
     }
   };
+
   const handleCurrentMonthChange = (direction: "next" | "prev") => {
     let newCurrentMonth = currentMonth;
     let newCurrentYear = currentYear;
@@ -165,6 +185,53 @@ const DatePicker: React.FC<DateRangePickerProps> = ({
     setCurrentYear(newNextMonthYear);
     setShowNextYearDropdown(false);
   };
+
+  const handlePredefinedRangeClick = (predefinedRange: DateRange) => {
+    const { startDate, endDate } = predefinedRange;
+    // Update the state with the new start and end dates
+    setDateRange({ startDate, endDate });
+    if (startDate && endDate) {
+      setWeekendDates({ weekendDates: getWeekendDates(startDate, endDate) });
+      const storedRange = JSON.stringify({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
+      localStorage.setItem("storedDateRange", storedRange);
+      setStoredDateRange({ startDate, endDate });
+    }
+  };
+
+  useEffect(() => {
+    const storedRange = localStorage.getItem("storedDateRange");
+    if (storedRange) {
+      const { startDate, endDate } = JSON.parse(storedRange);
+      setDateRange({
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+      });
+      setStoredDateRange({
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+      });
+      setWeekendDates({
+        weekendDates: getWeekendDates(new Date(startDate), new Date(endDate)),
+      });
+
+      // Update current and next month/year based on stored date range
+      setCurrentMonth(new Date(startDate).getMonth());
+      setCurrentYear(new Date(startDate).getFullYear());
+      setNextMonth(new Date(endDate).getMonth());
+      setNextMonthYear(new Date(endDate).getFullYear());
+    } else {
+      // Update current and next month/year based on today's date if no stored range
+      setCurrentMonth(today.getMonth());
+      setCurrentYear(today.getFullYear());
+      setNextMonth(today.getMonth() === 11 ? 0 : today.getMonth() + 1);
+      setNextMonthYear(
+        today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear()
+      );
+    }
+  }, []);
 
   return (
     <div className="p-2 transition-all duration-300 ease-in-out bg-gray-700 outline outline-sky-500 text-white max-w-4xl w-[40rem] mx-auto rounded-md shadow-md">
@@ -325,53 +392,92 @@ const DatePicker: React.FC<DateRangePickerProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-between items-start border-t border-white/35 mt-4">
+      <div className="flex justify-between items-start border-t border-white/35 mt-4 p-1">
         <div className="mt-4 w-fit">
           <h3 className="text-base mb-2">Weekend Dates:</h3>
-          <ul className="overflow-auto h-32">
+          <ul className="overflow-auto h-32 text-gray-400">
             {weekendDates.weekendDates.map((date) => (
               <li key={date.toISOString()}>{date.toLocaleDateString()}</li>
             ))}
           </ul>
         </div>
         <div className="mt-4 w-fit flex items-center justify-center gap-3">
-          <h3 className="text-base">Start Dates:</h3>
-          <span className="text-gray-400">
-            {dateRange.startDate?.toLocaleDateString()}
-          </span>
-          <h3 className="text-base">End Dates:</h3>
-          <span className="text-gray-400">
-            {dateRange.endDate?.toLocaleDateString()}
-          </span>
+          <div className="flex flex-col items-center gap-3 p-2 w-full mt-4">
+            <div className="flex items-start justify-start w-full gap-3 ">
+              <h3 className="text-base">Start Dates:</h3>
+              <span className="text-gray-400">
+                {dateRange.startDate?.toLocaleDateString()}
+              </span>
+            </div>
+            <div className="flex items-center w-full gap-3">
+              <h3 className="text-base">End Dates:</h3>
+              <span className="text-gray-400">
+                {dateRange.endDate?.toLocaleDateString()}
+              </span>
+            </div>
+            {predefinedRanges && (
+              <div className="">
+                <h3 className="mb-2">Predefined Ranges:</h3>
+                <div className="flex flex-wrap">
+                  {predefinedRanges.map((range) => (
+                    <button
+                      key={range.label}
+                      className="px-2 py-0.5 mr-2 mb-2 rounded border border-white/25 bg-sky-700 hover:bg-sky-700/70 transition-all duration-300 ease-in-out"
+                      onClick={() => handlePredefinedRangeClick(range.range)}
+                    >
+                      {range.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {dateRange.startDate && dateRange.endDate && (
-          <button
-            className="px-4 mt-4 py-1 rounded bg-sky-500 hover:bg-sky-600 transition-all duration-300 ease-in-out"
-            onClick={() => {
-              closeDatePicker();
-              router.push(
-                `?startdate=${dateRange.startDate?.toLocaleDateString()}&enddate=${dateRange.endDate?.toLocaleDateString()}`
-              );
-            }}
-          >
-            Save
-          </button>
-        )}
-
-        {predefinedRanges && (
-          <div className="mt-4">
-            <h3 className="text-lg font-bold mb-2">Predefined Ranges:</h3>
-            <div className="flex flex-wrap">
-              {predefinedRanges.map((range) => (
-                <button
-                  key={range.label}
-                  className="px-2 py-1 mr-2 mb-2 rounded bg-gray-700 hover:bg-gray-600"
-                  //   onClick={() => handlePredefinedRangeClick(range.range)}
-                >
-                  {range.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-2 ">
+            <button
+              className="px-4 mt-4 py-1 rounded bg-red-500 hover:bg-red-600 transition-all duration-300 ease-in-out"
+              onClick={() => {
+                setDateRange({
+                  startDate: null,
+                  endDate: null,
+                });
+                setWeekendDates({
+                  weekendDates: [],
+                });
+                localStorage.removeItem("storedDateRange");
+                setStoredDateRange(null);
+                closeDatePicker();
+                router.push("/");
+              }}
+            >
+              Clear
+            </button>
+            <button
+              className="px-4 mt-4 py-1 rounded bg-sky-500 hover:bg-sky-600 transition-all duration-300 ease-in-out"
+              onClick={() => {
+                if (dateRange.startDate && dateRange.endDate) {
+                  const storedRange = JSON.stringify({
+                    startDate: dateRange.startDate.toISOString(),
+                    endDate: dateRange.endDate.toISOString(),
+                  });
+                  localStorage.setItem("storedDateRange", storedRange);
+                  setStoredDateRange({
+                    startDate: dateRange.startDate,
+                    endDate: dateRange.endDate,
+                  });
+                } else {
+                  localStorage.removeItem("storedDateRange");
+                  setStoredDateRange(null);
+                }
+                closeDatePicker();
+                router.push(
+                  `?startdate=${dateRange.startDate?.toLocaleDateString()}&enddate=${dateRange.endDate?.toLocaleDateString()}`
+                );
+              }}
+            >
+              Save
+            </button>
           </div>
         )}
       </div>
