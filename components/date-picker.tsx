@@ -22,6 +22,8 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [showNextYearDropdown, setShowNextYearDropdown] = useState(false);
+  const [showNextMonthDropdown, setShowNextMonthDropdown] = useState(false);
 
   const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
   const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
@@ -118,85 +120,88 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
   };
 
   return (
-    <div className="p-8 transition-all duration-300 ease-in-out bg-gray-700 outline outline-sky-500 text-white max-w-4xl mx-auto rounded-md shadow-md">
-      <div className="flex justify-between mb-4">
-        <button
-          className="px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
-          onClick={() => {
-            if (currentMonth === 0) {
-              setCurrentMonth(11);
-              setCurrentYear(currentYear - 1);
-            } else {
-              setCurrentMonth(currentMonth - 1);
-            }
-          }}
-        >
-          &#60;
-        </button>
-        <div className="flex items-center justify-between gap-10 relative">
-          <button
-            onClick={() => setShowMonthDropdown(!showMonthDropdown)}
-            className="cursor-pointer"
-          >
-            <span className="mx-2">{months[currentMonth]}</span>
-          </button>
-          {showMonthDropdown && (
-            <div className="absolute top-full left-0 bg-gray-800 p-2 rounded shadow-md">
-              {months.map((month, index) => (
-                <div
-                  key={month}
-                  className="cursor-pointer p-1 hover:bg-gray-600"
-                  onClick={() => {
-                    setCurrentMonth(index);
-                    setShowMonthDropdown(false);
-                  }}
-                >
-                  {month}
+    <div className="p-2 transition-all duration-300 ease-in-out bg-gray-700 outline outline-sky-500 text-white max-w-4xl mx-auto rounded-md shadow-md">
+      <div className="flex justify-between w-full gap-2 border rounded-lg relative">
+        <div className="flex flex-col items-center gap-3 p-2 h-full w-1/2">
+          <div className="flex justify-around items-center gap-5 ">
+            <button
+              className="border px-2.5 py-1 border-sky-300 rounded-full bg-gray-700 hover:bg-gray-600"
+              onClick={() => {
+                if (currentMonth === 0) {
+                  setCurrentMonth(11);
+                  setCurrentYear(currentYear - 1);
+                } else {
+                  setCurrentMonth(currentMonth - 1);
+                }
+              }}
+            >
+              &#60;
+            </button>
+            <div className="flex items-center justify-between gap-5 relative">
+              <button
+                className="cursor-pointer border border-white/25 px-2 py-0.5 rounded-md bg-slate-500/80 hover:bg-gray-600 transition-all duration-300 ease-in-out"
+                onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+              >
+                <span className="mx-2">{months[currentMonth]}</span>
+              </button>
+              {showMonthDropdown && (
+                <ul className="absolute flex flex-col top-full left-0 w-fit overflow-auto h-48 bg-gray-800 p-2 rounded shadow-md z-10">
+                  {months.map((month, index) => (
+                    <li
+                      key={month}
+                      className="cursor-pointer p-1 hover:bg-gray-600 w-fit"
+                    >
+                      <button
+                        onClick={() => {
+                          setCurrentMonth(index);
+                          setShowMonthDropdown(false);
+                        }}
+                      >
+                        {month}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <button
+                className="cursor-pointer border border-white/25 px-2 py-0.5 rounded-md bg-sky-600/50 hover:bg-gray-600 transition-all duration-300 ease-in-out"
+                onClick={() => setShowYearDropdown(!showYearDropdown)}
+              >
+                <span>{currentYear}</span>
+              </button>
+              {showYearDropdown && (
+                <div className="absolute top-full left-16 bg-gray-800 p-2 rounded shadow-md z-10 h-48 overflow-y-auto">
+                  {years.map((year) => (
+                    <button
+                      key={year}
+                      className="cursor-pointer p-1 hover:bg-gray-600"
+                      onClick={() => {
+                        setCurrentYear(year);
+                        setShowYearDropdown(false);
+                      }}
+                    >
+                      {year}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-          <button
-            onClick={() => setShowYearDropdown(!showYearDropdown)}
-            className="cursor-pointer relative"
-          >
-            {currentYear}
-          </button>
-          {showYearDropdown && (
-            <div className="absolute top-full right-0 bg-gray-800 p-2 rounded shadow-md h-48 overflow-y-auto">
-              {years.map((year) => (
-                <div
-                  key={year}
-                  className="cursor-pointer p-1 hover:bg-gray-600"
-                  onClick={() => {
-                    setCurrentYear(year);
-                    setShowYearDropdown(false);
-                  }}
-                >
-                  {year}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <button
-          className="px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
-          onClick={() => {
-            if (currentMonth === 11) {
-              setCurrentMonth(0);
-              setCurrentYear(currentYear + 1);
-            } else {
-              setCurrentMonth(currentMonth + 1);
-            }
-          }}
-        >
-          &#62;
-        </button>
-      </div>
+            <button
+              className="border px-2.5 py-1 border-sky-300 rounded-full bg-gray-700 hover:bg-gray-600"
+              onClick={() => {
+                if (currentMonth === 11) {
+                  setCurrentMonth(0);
+                  setCurrentYear(currentYear + 1);
+                } else {
+                  setCurrentMonth(currentMonth + 1);
+                }
+              }}
+            >
+              &#62;
+            </button>
+          </div>
 
-      <div className="flex space-x-8">
-        <div>
-          <div className="grid grid-cols-7 gap-2 text-center mb-4">
+          <div className="grid grid-cols-7 gap-3 text-center mb-4">
             <div className="text-gray-400">Su</div>
             <div className="text-gray-400">Mo</div>
             <div className="text-gray-400">Tu</div>
@@ -210,8 +215,82 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
           </div>
         </div>
 
-        <div>
-          <div className="grid grid-cols-7 gap-2 text-center mb-4">
+        <div className="flex flex-col items-center gap-3 p-2 h-full w-1/2">
+          <div className="flex justify-around items-center gap-5">
+            <button
+              className="border px-2.5 py-1 border-sky-300 rounded-full bg-gray-700 hover:bg-gray-600"
+              onClick={() => {
+                if (nextMonth === 0) {
+                  setCurrentMonth(11);
+                  setCurrentYear(currentYear - 1);
+                } else {
+                  setCurrentMonth(nextMonth - 1);
+                }
+              }}
+            >
+              &#60;
+            </button>
+            <div className="flex items-center justify-between gap-5 relative">
+              <button
+                className="cursor-pointer border border-white/25 px-2 py-0.5 rounded-md bg-slate-500/80 hover:bg-gray-600 transition-all duration-300 ease-in-out"
+                onClick={() => setShowNextMonthDropdown(!showNextMonthDropdown)}
+              >
+                <span className="mx-2">{months[nextMonth]}</span>
+              </button>
+              {showNextMonthDropdown && (
+                <ul className="absolute flex flex-col top-[125%] right-9 w-fit overflow-auto h-48 bg-gray-800 p-2 rounded shadow-md z-10">
+                  {months.map((month, index) => (
+                    <button
+                      key={month}
+                      className="cursor-pointer p-1 hover:bg-gray-600"
+                      onClick={() => {
+                        setCurrentMonth(index - 1);
+                        setShowNextMonthDropdown(false);
+                      }}
+                    >
+                      {month}
+                    </button>
+                  ))}
+                </ul>
+              )}
+              <button
+                className="cursor-pointer border border-white/25 px-2 py-0.5 rounded-md bg-sky-600/50 hover:bg-gray-600 transition-all duration-300 ease-in-out"
+                onClick={() => setShowNextYearDropdown(!showNextYearDropdown)}
+              >
+                <span>{nextMonthYear}</span>
+              </button>
+              {showNextYearDropdown && (
+                <div className="absolute top-full left-16 bg-gray-800 p-2 rounded shadow-md z-10 h-48 overflow-y-auto">
+                  {years.map((year) => (
+                    <button
+                      key={year}
+                      className="cursor-pointer p-1 hover:bg-gray-600"
+                      onClick={() => {
+                        setCurrentYear(year);
+                        setShowNextYearDropdown(false);
+                      }}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              className="border px-2.5 py-1 border-sky-300 rounded-full bg-gray-700 hover:bg-gray-600"
+              onClick={() => {
+                if (nextMonth === 11) {
+                  setCurrentMonth(0);
+                  setCurrentYear(currentYear + 1);
+                } else {
+                  setCurrentMonth(nextMonth + 1);
+                }
+              }}
+            >
+              &#62;
+            </button>
+          </div>
+          <div className="grid grid-cols-7 gap-3 text-center mb-4">
             <div className="text-gray-400">Su</div>
             <div className="text-gray-400">Mo</div>
             <div className="text-gray-400">Tu</div>
