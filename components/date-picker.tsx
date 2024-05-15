@@ -14,6 +14,9 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+  const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+  const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
   const isDateInRange = (date: Date) => {
     const { startDate, endDate } = dateRange;
     return startDate && endDate && date >= startDate && date <= endDate;
@@ -43,9 +46,9 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
       setWeekendDates({ weekendDates: getWeekendDates(startDate, endDate) });
   };
 
-  const renderCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const renderCalendar = (month: number, year: number) => {
+    const daysInMonth = getDaysInMonth(month, year);
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
     const calendarRows = [];
 
     let date = 1;
@@ -67,7 +70,7 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
             ></div>
           );
         } else {
-          const currentDate = new Date(currentYear, currentMonth, date);
+          const currentDate = new Date(year, month, date);
           const isWeekendDay = isWeekend(currentDate);
 
           const isSelectedDay = isDateInRange(currentDate) && !isWeekendDay;
@@ -79,9 +82,9 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
           calendarCells.push(
             <button
               key={date}
-              className={`p-2 cursor-pointer text-center ${
+              className={`p-2 cursor-pointer text-center hover:bg-blue-200 hover:bg-opacity-20 ease-in-out transition-all duration-300 ${
                 isWeekendDay ? "text-gray-500" : "text-white"
-              } ${isSelectedDay ? "bg-blue-200" : ""} ${
+              } ${isSelectedDay ? "bg-blue-200 bg-opacity-20" : ""} ${
                 isStartOrEndDate
                   ? "bg-blue-500 rounded-sm text-white outline outline-sky-500"
                   : ""
@@ -104,59 +107,89 @@ const DatePicker: React.FC<DateRangePickerProps> = ({ predefinedRanges }) => {
   };
 
   return (
-    <div className="p-8 transition-all duration-300 ease-in-out bg-gray-700 outline outline-sky-500 text-white max-w-lg mx-auto rounded-md shadow-md">
+    <div className="p-8 transition-all duration-300 ease-in-out bg-gray-700 outline outline-sky-500 text-white max-w-4xl mx-auto rounded-md shadow-md">
       <div className="flex justify-between mb-4">
         <button
           className="px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
-          onClick={() =>
-            setCurrentMonth(currentMonth === 0 ? 11 : currentMonth - 1)
-          }
+          onClick={() => {
+            if (currentMonth === 0) {
+              setCurrentMonth(11);
+              setCurrentYear(currentYear - 1);
+            } else {
+              setCurrentMonth(currentMonth - 1);
+            }
+          }}
         >
           &#60;
         </button>
-        <div>
-          <span className="mx-2">
-            {new Date(currentYear, currentMonth).toLocaleString("default", {
-              month: "long",
-            })}
-          </span>
-          <span>{currentYear}</span>
+        <div className="flex items-center justify-between gap-10">
+          <div>
+            <span className="mx-2">
+              {new Date(currentYear, currentMonth).toLocaleString("default", {
+                month: "long",
+              })}
+            </span>
+            <span>{currentYear}</span>
+          </div>
+          <div>
+            <span className="mx-2">
+              {new Date(nextMonthYear, nextMonth).toLocaleString("default", {
+                month: "long",
+              })}
+            </span>
+            <span>{nextMonthYear}</span>
+          </div>
         </div>
         <button
           className="px-2 py-1 rounded bg-gray-700 hover:bg-gray-600"
-          onClick={() =>
-            setCurrentMonth(currentMonth === 11 ? 0 : currentMonth + 1)
-          }
+          onClick={() => {
+            if (currentMonth === 11) {
+              setCurrentMonth(0);
+              setCurrentYear(currentYear + 1);
+            } else {
+              setCurrentMonth(currentMonth + 1);
+            }
+          }}
         >
           &#62;
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-2 mb-4 text-center">
-        <div className="text-gray-400">Su</div>
-        <div className="text-gray-400">Mo</div>
-        <div className="text-gray-400">Tu</div>
-        <div className="text-gray-400">We</div>
-        <div className="text-gray-400">Th</div>
-        <div className="text-gray-400">Fr</div>
-        <div className="text-gray-400">Sa</div>
+
+      <div className="flex space-x-8">
+        <div>
+          <div className="grid grid-cols-7 gap-2 text-center mb-4">
+            <div className="text-gray-400">Su</div>
+            <div className="text-gray-400">Mo</div>
+            <div className="text-gray-400">Tu</div>
+            <div className="text-gray-400">We</div>
+            <div className="text-gray-400">Th</div>
+            <div className="text-gray-400">Fr</div>
+            <div className="text-gray-400">Sa</div>
+          </div>
+          <div className="space-y-1">
+            {renderCalendar(currentMonth, currentYear)}
+          </div>
+        </div>
+
+        <div>
+          <div className="grid grid-cols-7 gap-2 text-center mb-4">
+            <div className="text-gray-400">Su</div>
+            <div className="text-gray-400">Mo</div>
+            <div className="text-gray-400">Tu</div>
+            <div className="text-gray-400">We</div>
+            <div className="text-gray-400">Th</div>
+            <div className="text-gray-400">Fr</div>
+            <div className="text-gray-400">Sa</div>
+          </div>
+          <div className="space-y-1">
+            {renderCalendar(nextMonth, nextMonthYear)}
+          </div>
+        </div>
       </div>
-      <div className="space-y-1">{renderCalendar()}</div>
+
       <div className="mt-4">
-        <h3 className="text-lg font-bold mb-2">Selected Range:</h3>
-        <p>
-          Start Date:{" "}
-          {dateRange.startDate
-            ? dateRange.startDate.toLocaleDateString()
-            : "Not Selected"}
-        </p>
-        <p>
-          End Date:{" "}
-          {dateRange.endDate
-            ? dateRange.endDate.toLocaleDateString()
-            : "Not Selected"}
-        </p>
-        <p>Weekend Dates:</p>
-        <ul>
+        <h3 className="text-lg font-bold mb-2">Weekend Dates:</h3>
+        <ul className="overflow-auto h-32">
           {weekendDates.weekendDates.map((date) => (
             <li key={date.toISOString()}>{date.toLocaleDateString()}</li>
           ))}
