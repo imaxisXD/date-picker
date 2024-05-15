@@ -1,6 +1,7 @@
 "use client";
 import DatePicker from "@/components/date-picker";
 import { CalendarDays } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -51,6 +52,26 @@ export default function Home() {
           predefinedRanges={predefinedRanges}
         />
       )}
+      <span className="mt-4">
+        Made with ❤️ by{" "}
+        <Link
+          href="https://twitter.com/abhishek"
+          target="_blank"
+          rel="noreferrer"
+          className="text-sky-500 underline"
+        >
+          @abhishek
+        </Link>
+        <span className="mx-2">|</span>
+        <Link
+          href="mailto:sunny735084@gmail.com"
+          target="_blank"
+          rel="noreferrer"
+          className="text-sky-500 underline"
+        >
+          sunny735084@gmail.com
+        </Link>
+      </span>
     </main>
   );
 }
